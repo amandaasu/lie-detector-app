@@ -30,7 +30,7 @@ const Play = () => {
       setCurrentStatement({
         id: data.id,
         statements: data.facts,
-        username: "Anonymous",
+        username: data.userName || "Anonymous",
       });
       setLoading(false);
     } catch (err) {

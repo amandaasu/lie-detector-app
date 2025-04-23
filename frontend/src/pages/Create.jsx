@@ -6,12 +6,15 @@ import { v4 as uuidv4 } from "uuid";
 
 const MotionBox = motion(Box);
 const API_URL = import.meta.env.VITE_API_URL;
+
 const Create = () => {
   const navigate = useNavigate();
 
   const [activeStep, setActiveStep] = useState(0);
   const [statements, setStatements] = useState(["", "", ""]);
   const [lieIndex, setLieIndex] = useState(null);
+  const [userName, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState(false);
   const [errors, setErrors] = useState([false, false, false]);
   const [submitted, setSubmitted] = useState(false);
   const [formError, setFormError] = useState("");
@@ -23,7 +26,6 @@ const Create = () => {
     newStatements[index] = value;
     setStatements(newStatements);
 
-    // Clear error for this field if it has content
     if (value.trim() !== "") {
       const newErrors = [...errors];
       newErrors[index] = false;
@@ -43,10 +45,15 @@ const Create = () => {
 
   const handleNext = () => {
     if (activeStep === 0) {
-      if (!validateStatements()) {
-        setFormError("Please fill in all three statements");
+      const statementsValid = validateStatements();
+      const isUsernameValid = userName.trim() !== "";
+      setUsernameError(!isUsernameValid);
+
+      if (!statementsValid || !isUsernameValid) {
+        setFormError("Please fill in all fields including your name");
         return;
       }
+
       setFormError("");
     } else if (activeStep === 1) {
       if (lieIndex === null) {
@@ -65,17 +72,16 @@ const Create = () => {
   };
 
   const handleSubmit = () => {
-    if (statements.some((s) => s.trim() === "") || lieIndex === null) {
+    if (statements.some((s) => s.trim() === "") || lieIndex === null || userName.trim() === "") {
       setFormError("Please complete all required fields");
       return;
     }
 
-    submitEntry(statements, lieIndex);
-
+    submitEntry(statements, lieIndex, userName);
     setSubmitted(true);
   };
 
-  const submitEntry = async (facts, lieIndex) => {
+  const submitEntry = async (facts, lieIndex, userName) => {
     try {
       const response = await fetch(API_URL + "/new-entry", {
         method: "POST",
@@ -86,6 +92,7 @@ const Create = () => {
           facts: facts,
           id: uuidv4(),
           lieIndex: lieIndex,
+          userName: userName,
         }),
       });
 
@@ -101,6 +108,20 @@ const Create = () => {
       case 0:
         return (
           <Box>
+            <TextField
+              fullWidth
+              label="Your Name"
+              variant="outlined"
+              value={userName}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                if (e.target.value.trim() !== "") setUsernameError(false);
+              }}
+              error={usernameError}
+              helperText={usernameError ? "Please enter your name" : ""}
+              sx={{ mb: 3 }}
+            />
+
             <Typography variant="body1" sx={{ mb: 4 }}>
               Write three statements about yourself. Two should be true, and one should be a lie. Make them interesting and challenging to guess!
             </Typography>
@@ -197,15 +218,7 @@ const Create = () => {
       <MotionBox initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
         <Container maxWidth="sm">
           <Box sx={{ textAlign: "center", my: 4 }}>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 260,
-                damping: 20,
-              }}
-            >
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 20 }}>
               <Alert severity="success" variant="filled" sx={{ mb: 3, fontSize: "1.1rem" }}>
                 Your statements have been submitted successfully!
               </Alert>
