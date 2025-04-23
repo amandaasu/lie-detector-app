@@ -1,0 +1,19 @@
+{
+  "name": "amplify-cdk",
+  "version": "0.1.0",
+  "bin": {
+    "amplify-cdk": "bin/amplify-cdk.js"
+  },
+  "scripts": {
+    "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
+    "cdk": "cdk",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-amplify-alpha": "^2.191.0-alpha.0",
+    "constructs": "^10.0.0"
+  }
+}
